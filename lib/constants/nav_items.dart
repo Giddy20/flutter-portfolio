@@ -1,15 +1,5 @@
 import 'package:flutter/material.dart';
 
-List<String> navTitles = [
-  "About",
-  "Experience",
-  "Projects",
-  "Contact",
-];
+List<String> navTitles = ["About", "Experience", "Contact"];
 
-List<String> projectTitles = [
-  "Initmid",
-  "Leaf",
-  "Yought",
-  "Smart Term",
-];
+List<String> projectTitles = ["Intimid", "Leaf", "Yought", "Smart Term"];

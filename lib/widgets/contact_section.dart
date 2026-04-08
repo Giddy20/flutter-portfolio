@@ -1,78 +1,91 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../constants/colors.dart';
-import '../constants/links.dart';
 import '../constants/size.dart';
-import 'custom_text_field.dart';
-import 'dart:js' as js;
 
 class ContactSection extends StatelessWidget {
   const ContactSection({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-    return Container(
-      padding: const EdgeInsets.fromLTRB(25, 20, 25, 40),
-      height: screenHeight * 0.65,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
+    final isMobile = MediaQuery.of(context).size.width < kMinDesktopWidth;
 
+    return Container(
+      padding: const EdgeInsets.fromLTRB(0, 60, 0, 40),
+      child: Column(
+        children: [
+          // Section header
+          _sectionHeader("03.", "Contact", isMobile),
+          const SizedBox(height: 30),
+
+          // Content
           Column(
-            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 "Get in touch",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 30,
+                  fontSize: isMobile ? 24 : 30,
                   color: CustomColor.whitePrimary,
                 ),
               ),
-              verticalSpace(0.03),
-              const Text(
-                "What’s next? Feel free to reach out to me if you're looking for a developer,\nhave a query, or simply want to connect.",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 14,
-                  color: CustomColor.greyText,
+              const SizedBox(height: 16),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: isMobile ? 0 : 40),
+                child: Text(
+                  "Open to remote full-time and part-time Flutter roles globally.\nFeel free to reach out if you're looking for a developer, have a query, or simply want to connect.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w400,
+                    fontSize: 14,
+                    height: 1.7,
+                    color: CustomColor.greyText,
+                  ),
                 ),
               ),
 
-              const SizedBox(height: 50),
-
+              const SizedBox(height: 40),
 
               InkWell(
-                onHover: (v){
-
+                onTap: () async {
+                  final uri = Uri.parse('mailto:aigbogungideon@gmail.com');
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(uri);
+                  }
                 },
                 child: Container(
-                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 18),
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5),
-                      border: Border.all(color: CustomColor.secondaryColor)
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 14,
+                    horizontal: 24,
                   ),
-                  child: Text("Get in Touch",
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5),
+                    border: Border.all(color: CustomColor.secondaryColor),
+                  ),
+                  child: Text(
+                    "Say Hello",
                     style: GoogleFonts.firaCode().copyWith(
-                      fontSize: 12,
+                      fontSize: 14,
                       fontWeight: FontWeight.w500,
                       color: CustomColor.secondaryColor,
                     ),
                   ),
                 ),
               ),
-
-
             ],
           ),
 
-          Text("Built by Gideon Aigbogun\nwith Flutter Web",
+          const SizedBox(height: 80),
+
+          // Footer
+          Text(
+            "Built by Gideon Aigbogun\nwith Flutter Web",
             textAlign: TextAlign.center,
             style: GoogleFonts.firaCode().copyWith(
-              fontWeight: FontWeight.bold,height: 1.8,
+              fontWeight: FontWeight.w400,
+              height: 1.8,
               fontSize: 12,
               color: CustomColor.hintDark,
             ),
@@ -82,4 +95,34 @@ class ContactSection extends StatelessWidget {
     );
   }
 
+  Widget _sectionHeader(String number, String title, bool isMobile) {
+    return Row(
+      children: [
+        Text(
+          number,
+          style: GoogleFonts.firaCode().copyWith(
+            fontSize: isMobile ? 18 : 22,
+            fontWeight: FontWeight.bold,
+            color: CustomColor.secondaryColor,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: isMobile ? 22 : 30,
+            fontWeight: FontWeight.bold,
+            color: CustomColor.whitePrimary,
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Divider(
+            thickness: 1,
+            color: CustomColor.bgLight2.withOpacity(0.5),
+          ),
+        ),
+      ],
+    );
+  }
 }

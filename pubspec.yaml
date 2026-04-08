@@ -23,6 +23,7 @@ dependencies:
   google_fonts:
   shimmer:
   loading_animation_widget:
+  url_launcher:
 
 
 dev_dependencies:

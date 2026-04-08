@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gideon_aigbogun/constants/colors.dart';
-
-import '../constants/links.dart';
 import '../constants/size.dart';
-
-import 'dart:js' as js;
-
 import '../widgets/about_desktop.dart';
 import '../widgets/contact_section.dart';
 import '../widgets/custom_side_links.dart';
@@ -13,7 +8,6 @@ import '../widgets/custom_side_mail.dart';
 import '../widgets/header_desktop.dart';
 import '../widgets/main_desktop.dart';
 import '../widgets/projects_section.dart';
-
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -25,93 +19,169 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
   final scrollController = ScrollController();
-  final List<GlobalKey> navbarKeys = List.generate(4, (index) => GlobalKey());
+  final List<GlobalKey> navbarKeys = List.generate(3, (index) => GlobalKey());
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
-    final screenWidth = screenSize.width;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < kMinDesktopWidth;
+    final isTablet =
+        screenWidth >= kMinDesktopWidth && screenWidth < kMedDesktopWidth;
 
-    return LayoutBuilder(builder: (context, constraints) {
-      return Scaffold(
-        key: scaffoldKey,
-        backgroundColor: CustomColor.scaffoldBg,
-        endDrawer: constraints.maxWidth >= kMinDesktopWidth
-            ? null : SizedBox(),
-        //     : S(onNavItemTap: (int navIndex) {
-        //   scaffoldKey.currentState?.closeEndDrawer();
-        //   scrollToSection(navIndex);
-        // }),
-        body: Stack(
-          children: [
-            SingleChildScrollView(
-              controller: scrollController,
-              scrollDirection: Axis.vertical,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 160),
-                child: Column(
-                  children: [
-                    SizedBox(),
-                    // MAIN
+    // Responsive horizontal padding
+    double hPadding;
+    if (isMobile) {
+      hPadding = 20;
+    } else if (isTablet) {
+      hPadding = 50;
+    } else {
+      hPadding = screenWidth * 0.1; // ~10% on large screens
+    }
 
-                    if (constraints.maxWidth >= kMinDesktopWidth)
-                      MainDesktop(key: navbarKeys[0],)
-                    else
-                      const SizedBox(),
-                    // Divider(color: CustomColor.secondaryColor, height: 30,),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Scaffold(
+          key: scaffoldKey,
+          backgroundColor: CustomColor.scaffoldBg,
+          endDrawer: isMobile ? _buildMobileDrawer() : null,
+          body: Stack(
+            children: [
+              SingleChildScrollView(
+                controller: scrollController,
+                scrollDirection: Axis.vertical,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: hPadding),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 80), // space for fixed header
+                      // HERO
+                      MainDesktop(
+                        isMobile: isMobile,
+                        onContactTap: () => scrollToSection(2),
+                        onExperienceTap: () => scrollToSection(1),
+                      ),
 
-                    if (constraints.maxWidth >= kMinDesktopWidth)
-                      AboutDesktop(key: navbarKeys[1],)
-                    else
-                      const SizedBox(),
+                      // ABOUT
+                      AboutDesktop(key: navbarKeys[0], isMobile: isMobile),
 
+                      // EXPERIENCE
+                      ProjectsSection(key: navbarKeys[1], isMobile: isMobile),
 
-                    ProjectsSection(
-                      key: navbarKeys[2],
-                    ),
-
-
-                    ContactSection(
-                      key: navbarKeys[3],
-                    ),
-
-                  ],
+                      // CONTACT
+                      ContactSection(key: navbarKeys[2]),
+                    ],
+                  ),
                 ),
               ),
-            ),
 
-            Align(
+              // Fixed header
+              Align(
                 alignment: Alignment.topCenter,
-                child: (constraints.maxWidth >= kMinDesktopWidth) ?
-                HeaderDesktop(onNavMenuTap: (int navIndex) {
-                  scrollToSection(navIndex);
-                }) : SizedBox()
-            ),
+                child: HeaderDesktop(
+                  isMobile: isMobile,
+                  onNavMenuTap: (int navIndex) {
+                    scrollToSection(navIndex);
+                  },
+                  onMenuTap: () {
+                    scaffoldKey.currentState?.openEndDrawer();
+                  },
+                ),
+              ),
 
-            Align(
-                alignment: Alignment.centerLeft,
-                child: (constraints.maxWidth >= kMinDesktopWidth) ?
-                SideLinks() : SizedBox()
-            ),
+              // Side rails (desktop only)
+              if (!isMobile && !isTablet)
+                Align(alignment: Alignment.centerLeft, child: SideLinks()),
 
-            Align(
-                alignment: Alignment.centerRight,
-                child: (constraints.maxWidth >= kMinDesktopWidth) ?
-                SideMail() : SizedBox()
-            ),
-          ],
+              if (!isMobile && !isTablet)
+                Align(alignment: Alignment.centerRight, child: SideMail()),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildMobileDrawer() {
+    final navLabels = ["About", "Experience", "Contact"];
+    return Drawer(
+      backgroundColor: CustomColor.cardBg,
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Align(
+                alignment: Alignment.topRight,
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.close,
+                    color: CustomColor.secondaryColor,
+                    size: 28,
+                  ),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ),
+              const SizedBox(height: 30),
+              for (int i = 0; i < navLabels.length; i++)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 24),
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      scrollToSection(i);
+                    },
+                    child: Row(
+                      children: [
+                        Text(
+                          "0${i + 1}. ",
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: CustomColor.secondaryColor,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          navLabels[i],
+                          style: const TextStyle(
+                            fontSize: 18,
+                            color: CustomColor.whitePrimary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              const Spacer(),
+              Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 12,
+                    horizontal: 30,
+                  ),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5),
+                    border: Border.all(color: CustomColor.secondaryColor),
+                  ),
+                  child: const Text(
+                    "Resume",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: CustomColor.secondaryColor,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-      );
-    });
+      ),
+    );
   }
 
   void scrollToSection(int navIndex) {
-    // if (navIndex == 4) {
-    //   // open a blog page
-    //   js.context.callMethod('open', [Links.blog]);
-    //   return;
-    // }
-
     final key = navbarKeys[navIndex];
     Scrollable.ensureVisible(
       key.currentContext!,

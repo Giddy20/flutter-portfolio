@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:gideon_aigbogun/constants/size.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../constants/colors.dart';
-import 'dart:js' as js;
-
 import '../utils/project_utils.dart';
 
 class ProjectCardWidget extends StatelessWidget {
-  const ProjectCardWidget({
-    super.key,
-    required this.project,
-  });
+  const ProjectCardWidget({super.key, required this.project});
   final ProjectUtils project;
+
+  Future<void> _openUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +36,6 @@ class ProjectCardWidget extends StatelessWidget {
             width: width(),
             fit: BoxFit.cover,
           ),
-          // title
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 15, 12, 12),
             child: Text(
@@ -44,7 +46,6 @@ class ProjectCardWidget extends StatelessWidget {
               ),
             ),
           ),
-          // subtitle
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
             child: Text(
@@ -56,13 +57,9 @@ class ProjectCardWidget extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          // footer
           Container(
             color: CustomColor.cardBg,
-            padding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 10,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             child: Row(
               children: [
                 const Text(
@@ -75,31 +72,23 @@ class ProjectCardWidget extends StatelessWidget {
                 const Spacer(),
                 if (project.iosLink != null)
                   InkWell(
-                    onTap: () {
-                      js.context.callMethod("open", [project.iosLink]);
-                    },
-                    child: Image.asset(
-                      "assets/icons/app-store.png",
-                      width: 19,
-                    ),
+                    onTap: () => _openUrl(project.iosLink!),
+                    child: Image.asset("assets/icons/app-store.png", width: 19),
                   ),
                 if (project.androidLink != null)
                   Padding(
                     padding: const EdgeInsets.only(left: 6),
                     child: InkWell(
-                      onTap: () {
-                        js.context.callMethod("open", [project.androidLink]);
-                      },
+                      onTap: () => _openUrl(project.androidLink!),
                       child: Image.asset(
                         "assets/icons/playstore.png",
                         width: 17,
                       ),
                     ),
                   ),
-
               ],
             ),
-          )
+          ),
         ],
       ),
     );
